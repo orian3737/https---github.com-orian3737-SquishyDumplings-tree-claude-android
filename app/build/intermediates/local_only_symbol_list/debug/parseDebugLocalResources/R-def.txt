@@ -1,0 +1,7 @@
+R_DEF: Internal format may change without notice
+local
+drawable dumpling_happy
+drawable dumpling_hop
+drawable dumpling_idle
+drawable dumpling_sleepy
+string app_name

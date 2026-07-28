@@ -1,0 +1,42 @@
+{
+  "expo": {
+    "name": "Squishy Dumplings",
+    "slug": "squishy-dumplings-apple",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "scheme": "squishydumplings",
+    "userInterfaceStyle": "light",
+    "icon": "./assets/app-icon.png",
+    "plugins": [
+      "expo-router",
+      "expo-sqlite",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#f3ecdd",
+          "image": "./assets/prototype/dumpling_idle.png",
+          "imageWidth": 220
+        }
+      ]
+    ],
+    "ios": {
+      "bundleIdentifier": "com.dinosaur5.squishydumplings",
+      "icon": "./assets/app-icon.png",
+      "supportsTablet": false,
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "18584504-93a1-424c-8581-4087499a2128"
+      }
+    },
+    "owner": "dinosaur5"
+  }
+}

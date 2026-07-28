@@ -1,0 +1,16 @@
+export const colors = {
+  cream: '#fff3e0',
+  paper: '#fffaf3',
+  amber: '#ffc107',
+  amberDeep: '#d58b00',
+  brown: '#6d4c41',
+  brownSoft: '#946f62',
+  lawn: '#8bc34a',
+  lawnSoft: '#dff1c8',
+  dirt: '#795548',
+  sky: '#dff4ff',
+  ink: '#392b26',
+  muted: '#7d6c65',
+  white: '#ffffff',
+  danger: '#c65d4b',
+} as const;

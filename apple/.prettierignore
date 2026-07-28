@@ -1,0 +1,12 @@
+node_modules
+.expo
+coverage
+dist
+package-lock.json
+docs/ASSET_MANIFEST.md
+docs/BUILD_SPEC.md
+docs/CODEX_BUILD_METHOD.md
+
+# Supabase local state and generated SQL dumps
+supabase/.temp/
+supabase/.branches/

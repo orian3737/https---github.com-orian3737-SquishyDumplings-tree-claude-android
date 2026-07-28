@@ -1,0 +1,42 @@
+name: Apple checks
+
+on:
+  pull_request:
+    paths:
+      - "apple/**"
+      - ".github/workflows/apple-checks.yml"
+  push:
+    branches:
+      - "codex/apple"
+    paths:
+      - "apple/**"
+      - ".github/workflows/apple-checks.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apple
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.3.0
+          cache: npm
+          cache-dependency-path: apple/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run quality gates
+        run: npm run check
+
+      - name: Verify iOS bundle
+        run: npx expo export --platform ios --output-dir "$RUNNER_TEMP/squishy-ios-export"
