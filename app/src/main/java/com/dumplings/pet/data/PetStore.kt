@@ -5,19 +5,37 @@ import com.dumplings.pet.model.PersonalityTag
 import com.dumplings.pet.model.Pet
 import com.dumplings.pet.model.PetStats
 import com.dumplings.pet.model.Rarity
+import com.posthog.PostHog
 
 class PetStore(context: Context) {
     private val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
     fun loadOrCreate(defaultName: String): Pet {
-        val id = prefs.getString(KEY_ID, null) ?: return Pet.unboxNew(defaultName)
+        val id = prefs.getString(KEY_ID, null)
+        if (id == null) {
+            val newPet = Pet.unboxNew(defaultName)
+            PostHog.identify(distinctId = newPet.id)
+            PostHog.capture(
+                event = "pet_created",
+                properties = mapOf(
+                    "pet_name" to newPet.name,
+                    "rarity" to newPet.rarity.name.lowercase(),
+                    "evolution_stage" to newPet.evolutionStage
+                ),
+                userPropertiesSetOnce = mapOf(
+                    "pet_rarity" to newPet.rarity.name.lowercase(),
+                    "pet_name" to newPet.name
+                )
+            )
+            return newPet
+        }
         val name = prefs.getString(KEY_NAME, defaultName) ?: defaultName
         val rarity = prefs.getString(KEY_RARITY, null)?.let(::rarityOrNull) ?: Rarity.COMMON
         val personalityTags = prefs.getStringSet(KEY_PERSONALITY_TAGS, emptySet()).orEmpty()
             .mapNotNull(::personalityTagOrNull)
             .toSet()
 
-        return Pet(
+        val existingPet = Pet(
             id = id,
             name = name,
             rarity = rarity,
@@ -31,6 +49,8 @@ class PetStore(context: Context) {
             personalityTags = personalityTags,
             bornAtMillis = prefs.getLong(KEY_BORN_AT_MILLIS, System.currentTimeMillis())
         )
+        PostHog.identify(distinctId = existingPet.id)
+        return existingPet
     }
 
     fun save(pet: Pet) {

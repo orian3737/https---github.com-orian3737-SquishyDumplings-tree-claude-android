@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.dumplings.pet.data.PetStore
 import com.dumplings.pet.overlay.OverlayService
+import com.posthog.PostHog
 
 /**
  * Full-interaction mode: where feed/clean/play actually happen. The
@@ -53,6 +54,13 @@ fun HomeScreen() {
     fun startOverlay() {
         ContextCompat.startForegroundService(context, Intent(context, OverlayService::class.java))
         ambientActive = true
+        PostHog.capture(
+            event = "overlay_started",
+            properties = mapOf(
+                "rarity" to pet.rarity.name.lowercase(),
+                "evolution_stage" to pet.evolutionStage
+            )
+        )
     }
 
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
@@ -88,13 +96,47 @@ fun HomeScreen() {
         Spacer(modifier = Modifier.height(24.dp))
 
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Button(onClick = { pet = pet.copy(stats = pet.stats.feed()) }) {
+            Button(onClick = {
+                val newPet = pet.copy(stats = pet.stats.feed())
+                pet = newPet
+                PostHog.capture(
+                    event = "pet_fed",
+                    properties = mapOf(
+                        "hunger_after" to newPet.stats.hunger,
+                        "rarity" to newPet.rarity.name.lowercase(),
+                        "evolution_stage" to newPet.evolutionStage
+                    )
+                )
+            }) {
                 Text("Feed")
             }
-            Button(onClick = { pet = pet.copy(stats = pet.stats.clean()) }) {
+            Button(onClick = {
+                val newPet = pet.copy(stats = pet.stats.clean())
+                pet = newPet
+                PostHog.capture(
+                    event = "pet_cleaned",
+                    properties = mapOf(
+                        "cleanliness_after" to newPet.stats.cleanliness,
+                        "rarity" to newPet.rarity.name.lowercase(),
+                        "evolution_stage" to newPet.evolutionStage
+                    )
+                )
+            }) {
                 Text("Clean")
             }
-            Button(onClick = { pet = pet.copy(stats = pet.stats.play()) }) {
+            Button(onClick = {
+                val newPet = pet.copy(stats = pet.stats.play())
+                pet = newPet
+                PostHog.capture(
+                    event = "pet_played_with",
+                    properties = mapOf(
+                        "happiness_after" to newPet.stats.happiness,
+                        "energy_after" to newPet.stats.energy,
+                        "rarity" to newPet.rarity.name.lowercase(),
+                        "evolution_stage" to newPet.evolutionStage
+                    )
+                )
+            }) {
                 Text("Play")
             }
         }
@@ -102,11 +144,23 @@ fun HomeScreen() {
         Spacer(modifier = Modifier.height(12.dp))
 
         if (pet.canEvolve) {
-            Button(onClick = { pet = pet.evolved() }) {
+            Button(onClick = {
+                val newPet = pet.evolved()
+                pet = newPet
+                PostHog.capture(
+                    event = "pet_evolved",
+                    properties = mapOf(
+                        "evolution_stage" to newPet.evolutionStage,
+                        "rarity" to newPet.rarity.name.lowercase(),
+                        "max_evolution_stage" to newPet.rarity.maxEvolutionStage
+                    )
+                )
+            }) {
                 Text("Evolve!")
             }
-            Spacer(modifier = Modifier.height(12.dp))
         }
+
+        Spacer(modifier = Modifier.height(12.dp))
 
         Card(modifier = Modifier.fillMaxWidth().padding(top = 12.dp)) {
             Column(modifier = Modifier.padding(16.dp)) {
@@ -121,6 +175,13 @@ fun HomeScreen() {
                     if (ambientActive) {
                         context.stopService(intent)
                         ambientActive = false
+                        PostHog.capture(
+                            event = "overlay_stopped",
+                            properties = mapOf(
+                                "rarity" to pet.rarity.name.lowercase(),
+                                "evolution_stage" to pet.evolutionStage
+                            )
+                        )
                     } else if (
                         Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
                         ContextCompat.checkSelfPermission(

@@ -9,13 +9,16 @@ import androidx.compose.runtime.mutableStateOf
 import com.dumplings.pet.ui.screens.HomeScreen
 import com.dumplings.pet.ui.screens.OnboardingScreen
 import com.dumplings.pet.ui.theme.SquishyDumplingsTheme
+import com.posthog.PostHog
 
 class MainActivity : ComponentActivity() {
     private val hasOverlayPermission = mutableStateOf(false)
+    private var previousOverlayPermission = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        hasOverlayPermission.value = canDrawOverlays()
+        previousOverlayPermission = canDrawOverlays()
+        hasOverlayPermission.value = previousOverlayPermission
 
         setContent {
             SquishyDumplingsTheme {
@@ -32,7 +35,12 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
-        hasOverlayPermission.value = canDrawOverlays()
+        val hasPermission = canDrawOverlays()
+        if (hasPermission && !previousOverlayPermission) {
+            PostHog.capture(event = "overlay_permission_granted")
+        }
+        previousOverlayPermission = hasPermission
+        hasOverlayPermission.value = hasPermission
     }
 
     private fun canDrawOverlays(): Boolean = Settings.canDrawOverlays(this)

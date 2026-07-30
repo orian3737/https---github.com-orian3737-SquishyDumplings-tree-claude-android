@@ -45,6 +45,7 @@ import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.dumplings.pet.MainActivity
 import com.dumplings.pet.SquishyDumplingsApp
+import com.posthog.PostHog
 import com.dumplings.pet.data.OverlayPositionStore
 import com.dumplings.pet.data.PetStore
 import com.dumplings.pet.model.PetStats
@@ -207,6 +208,7 @@ class OverlayService : Service(), LifecycleOwner, ViewModelStoreOwner, SavedStat
                     overlayPositionStore.save(params.x, params.y)
                     if (!moved && event.actionMasked == MotionEvent.ACTION_UP) {
                         tapSignal += 1
+                        PostHog.capture(event = "overlay_tapped")
                     }
                     true
                 }

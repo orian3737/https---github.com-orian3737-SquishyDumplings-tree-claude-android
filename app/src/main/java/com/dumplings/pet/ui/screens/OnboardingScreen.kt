@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.posthog.PostHog
 
 /**
  * Shown on first launch (or whenever overlay permission is missing). Android
@@ -56,6 +57,7 @@ fun OnboardingScreen() {
         )
         Spacer(modifier = Modifier.height(24.dp))
         Button(onClick = {
+            PostHog.capture(event = "onboarding_permission_requested")
             val intent = Intent(
                 Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
                 Uri.parse("package:${context.packageName}")

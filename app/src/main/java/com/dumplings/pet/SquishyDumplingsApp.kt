@@ -4,11 +4,35 @@ import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.os.Build
+import com.posthog.android.PostHogAndroid
+import com.posthog.android.PostHogAndroidConfig
 
 class SquishyDumplingsApp : Application() {
     override fun onCreate() {
         super.onCreate()
         createOverlayNotificationChannel()
+        setupPostHog()
+    }
+
+    private fun setupPostHog() {
+        val apiKey = BuildConfig.POSTHOG_PROJECT_TOKEN
+        val host = BuildConfig.POSTHOG_HOST
+        if (apiKey.isEmpty()) {
+            if (BuildConfig.DEBUG) {
+                error("POSTHOG_PROJECT_TOKEN variable required by PostHog is missing or un-configured, this causes events to be silently missed. This error stops appearing once POSTHOG_PROJECT_TOKEN is configured")
+            }
+            return
+        }
+        val config = PostHogAndroidConfig(
+            apiKey = apiKey,
+            host = host.ifEmpty { "https://us.i.posthog.com" }
+        ).apply {
+            captureApplicationLifecycleEvents = true
+            captureScreenViews = true
+            captureDeepLinks = true
+            errorTrackingConfig.autoCapture = true
+        }
+        PostHogAndroid.setup(this, config)
     }
 
     private fun createOverlayNotificationChannel() {
